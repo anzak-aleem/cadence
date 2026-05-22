@@ -124,6 +124,12 @@ body[data-phase="alarm"] .phase-label { color: var(--red);   font-weight: 700; }
 /* When alarm fires, the hand has stopped — no transition needed for snap */
 body[data-phase="alarm"] .hand { transition: none; }
 
+/* Hand is draggable during active phases */
+body[data-phase="work"] .hand,
+body[data-phase="rest"] .hand { cursor: grab; }
+/* Instant movement while scrubbing — no easing lag behind pointer */
+.hand.dragging { transition: none !important; cursor: grabbing; }
+
 .boundary-knob {
   cursor: grab;
   transition: r 120ms, fill 120ms;

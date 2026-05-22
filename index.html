@@ -71,8 +71,10 @@
         <!-- Hand: rotated by JS via transform="rotate(angle 200 200)".
              Floats between radius 35 (inner) and radius 110 (outer).
              Drawn AFTER the readout so it visibly crosses the text like a real
-             clock hand. Thick stroke + bigger tip = easy to spot at any angle. -->
+             clock hand. Thick stroke + bigger tip = easy to spot at any angle.
+             The invisible hand-hit line gives a wide grab target. -->
         <g id="hand" class="hand">
+          <line class="hand-hit" x1="200" y1="200" x2="200" y2="84" stroke="transparent" stroke-width="24" stroke-linecap="round"/>
           <line x1="200" y1="165" x2="200" y2="90" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
           <circle cx="200" cy="90" r="6" fill="var(--ink)"/>
         </g>

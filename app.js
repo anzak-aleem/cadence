@@ -179,7 +179,10 @@ function render() {
   els.body.dataset.phase = d.uiPhase;
 
   // ---- Readout & hint text ----
-  let label, main, sub, hint, footer = 'Drag the dot on the dial to adjust the split.';
+  let label, main, sub, hint;
+  let footer = (d.uiPhase === 'idle')
+    ? 'Drag the dot on the dial to adjust the split.'
+    : 'Drag the hand to adjust elapsed time · Drag the dot to change the split.';
 
   if (d.uiPhase === 'idle') {
     label = 'IDLE';
@@ -342,6 +345,52 @@ els.muteToggle.addEventListener('click', () => {
   save();
   render();
 });
+
+// ----- Drag the hand (scrub elapsed time, 5-min snaps) -----
+let draggingHand = false;
+
+function setHandMinute(rawMinute) {
+  const { phase, workMinutes, restMinutes } = state;
+  if (phase === 'idle') return;
+
+  let newElapsedMin;
+  if (phase === 'work') {
+    const snapped = clamp(Math.round(rawMinute / SNAP_STEP) * SNAP_STEP, 0, workMinutes);
+    newElapsedMin = snapped;
+  } else {
+    // rest phase: hand spans workMinutes → TOTAL_MINUTES
+    const snapped = clamp(Math.round(rawMinute / SNAP_STEP) * SNAP_STEP, workMinutes, TOTAL_MINUTES);
+    newElapsedMin = snapped - workMinutes;
+  }
+
+  state.phaseStartedAt = Date.now() - newElapsedMin * 60 * 1000;
+  lastChimedAt = 0;
+  save();
+  render();
+}
+
+function onHandPointerDown(e) {
+  if (state.phase === 'idle') return;
+  e.preventDefault();
+  e.stopPropagation();   // don't let knob or window handlers fire too
+  draggingHand = true;
+  els.hand.classList.add('dragging');
+  setHandMinute(minutesFromPoint(svgPointFromEvent(e)));
+}
+function onHandPointerMove(e) {
+  if (!draggingHand) return;
+  setHandMinute(minutesFromPoint(svgPointFromEvent(e)));
+}
+function onHandPointerUp() {
+  if (!draggingHand) return;
+  draggingHand = false;
+  els.hand.classList.remove('dragging');
+}
+
+els.hand.addEventListener('pointerdown', onHandPointerDown);
+window.addEventListener('pointermove',   onHandPointerMove);
+window.addEventListener('pointerup',     onHandPointerUp);
+window.addEventListener('pointercancel', onHandPointerUp);
 
 // ----- Drag the boundary knob -----
 let dragging = false;
