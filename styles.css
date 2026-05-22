@@ -70,6 +70,33 @@ body[data-phase="work"]  .phase-label { color: var(--green); font-weight: 600; }
 body[data-phase="rest"]  .phase-label { color: var(--red);   font-weight: 600; }
 body[data-phase="alarm"] .phase-label { color: var(--red);   font-weight: 700; }
 
+/* Stop toggle — top right of header, left of mute */
+.stop-toggle {
+  position: absolute;
+  top: 0;
+  right: 46px;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 120ms, color 200ms, border-color 200ms, opacity 200ms;
+  opacity: 0;
+  pointer-events: none;
+}
+.stop-toggle:hover { color: var(--ink); }
+.stop-toggle:active { transform: scale(0.95); }
+.stop-icon { width: 18px; height: 18px; display: block; }
+body:not([data-phase="idle"]) .stop-toggle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Mute toggle — top right of header */
 .mute-toggle {
   position: absolute;

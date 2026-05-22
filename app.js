@@ -149,6 +149,7 @@ const els = {
   hint:          $('#hint'),
   workBtn:       $('#workBtn'),
   restBtn:       $('#restBtn'),
+  stopToggle:    $('#stopToggle'),
   muteToggle:    $('#muteToggle'),
   footerHint:    $('#footerHint'),
 };
@@ -342,6 +343,14 @@ els.restBtn.addEventListener('click', () => startPhase('rest'));
 
 els.muteToggle.addEventListener('click', () => {
   state.muted = !state.muted;
+  save();
+  render();
+});
+
+els.stopToggle.addEventListener('click', () => {
+  state.phase = 'idle';
+  state.phaseStartedAt = null;
+  lastChimedAt = 0;
   save();
   render();
 });
