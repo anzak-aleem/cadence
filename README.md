@@ -89,7 +89,7 @@ The honest path is: ship v1/v2 quickly to validate that *you actually use it*, t
 ## Project layout
 
 ```
-cadence/
+Cadence/
 ├── README.md           ← this file
 ├── index.html          ← the whole UI (inline SVG dial + buttons)
 ├── styles.css          ← layout and colors

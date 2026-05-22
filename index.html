@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F5F5F4">
+  <title>Cadence</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-phase="idle">
+  <main class="app">
+
+    <header class="app-header">
+      <h1>Cadence</h1>
+      <p class="phase-label" id="phaseLabel">45 min work · 15 min rest</p>
+      <button class="mute-toggle" id="muteToggle" aria-label="Mute alarm" type="button">
+        <svg class="mute-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <!-- Bell (visible when not muted) -->
+          <g class="bell-on" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 16 a6 6 0 0 1 12 0 v4 l2 3 H4 l2 -3 z"/>
+            <path d="M10 23 a2 2 0 0 0 4 0"/>
+          </g>
+          <!-- Bell with slash (visible when muted) -->
+          <g class="bell-off" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 16 a6 6 0 0 1 12 0 v4 l2 3 H4 l2 -3 z"/>
+            <path d="M10 23 a2 2 0 0 0 4 0"/>
+            <line x1="3" y1="3" x2="21" y2="21" stroke-width="2"/>
+          </g>
+        </svg>
+      </button>
+    </header>
+
+    <div class="dial-wrap">
+      <svg class="dial" id="dial" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-label="Timer dial">
+        <!-- Pulsing rings for alarm state -->
+        <g class="alarm-pulse" id="alarmPulse" aria-hidden="true">
+          <circle cx="200" cy="200" r="155"/>
+          <circle cx="200" cy="200" r="170"/>
+          <circle cx="200" cy="200" r="185"/>
+        </g>
+
+        <!-- Track underneath the colored arcs -->
+        <circle cx="200" cy="200" r="130" fill="none" stroke="var(--track)" stroke-width="30"/>
+
+        <!-- Work arc (green). 'd' attribute filled in by JS. -->
+        <path id="workArc" d="" fill="none" stroke="var(--green)" stroke-width="30"/>
+        <!-- Rest arc (red). 'd' attribute filled in by JS. -->
+        <path id="restArc" d="" fill="none" stroke="var(--red)" stroke-width="30"/>
+
+        <!-- Quarter tick marks on top of arcs (subtle separators) -->
+        <g class="ticks" stroke="var(--bg)" stroke-width="2" fill="none">
+          <line x1="200" y1="80" x2="200" y2="90"/>
+          <line x1="310" y1="200" x2="320" y2="200"/>
+          <line x1="200" y1="310" x2="200" y2="320"/>
+          <line x1="80" y1="200" x2="90" y2="200"/>
+        </g>
+
+        <!-- Boundary knob (draggable). cx/cy filled in by JS. -->
+        <circle id="boundaryKnob" class="boundary-knob" cx="70" cy="200" r="11"
+                fill="var(--card)" stroke="var(--ink)" stroke-width="2"
+                tabindex="0" role="slider"
+                aria-label="Work / rest split"
+                aria-valuemin="5" aria-valuemax="55" aria-valuenow="45"/>
+
+        <!-- Hand: rotated by JS via transform="rotate(angle 200 200)" -->
+        <g id="hand" class="hand">
+          <line x1="200" y1="200" x2="200" y2="105" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="200" cy="105" r="4" fill="var(--ink)"/>
+        </g>
+
+        <!-- Pivot dot (drawn over hand line so the joint looks clean) -->
+        <circle cx="200" cy="200" r="6" fill="var(--ink)" id="pivot"/>
+
+        <!-- Center readout (drawn on top so it's legible even when hand crosses) -->
+        <text id="readoutLabel" class="readout-label" x="200" y="186" text-anchor="middle">IDLE</text>
+        <text id="readoutMain" class="readout-main" x="200" y="222" text-anchor="middle">0:00</text>
+        <text id="readoutSub" class="readout-sub" x="200" y="245" text-anchor="middle">/ 45:00</text>
+      </svg>
+    </div>
+
+    <p class="hint" id="hint">Tap a button to begin.</p>
+
+    <div class="buttons">
+      <button class="phase-btn work" id="workBtn" type="button">Start work</button>
+      <button class="phase-btn rest" id="restBtn" type="button">Start rest</button>
+    </div>
+
+    <footer class="footer-hint" id="footerHint">Drag the dot on the dial to adjust the split.</footer>
+
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

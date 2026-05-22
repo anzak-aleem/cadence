@@ -1,0 +1,255 @@
+/* Cadence — single-page work/rest timer.
+   Vanilla CSS, no preprocessor. Colors and a few sizes live in custom
+   properties at :root so it's easy to retheme later. */
+
+:root {
+  --bg:     #F5F5F4;
+  --card:   #FAFAF9;
+  --ink:    #1C1917;
+  --muted:  #78716C;
+  --hint:   #A8A29E;
+  --track:  #E7E5E4;
+  --green:  #127a38;
+  --green-dim: #27824899;
+  --red:    #8f2424;
+  --red-dim:   #d33d3d99;
+  --border: #D6D3D1;
+
+  --radius-btn: 999px;
+  --hand-transition: transform 280ms cubic-bezier(.4,.0,.2,1);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 24px 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ---------- Header ---------- */
+.app-header {
+  position: relative;
+  text-align: center;
+  padding-top: 4px;
+}
+.app-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.phase-label {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  transition: color 200ms;
+}
+body[data-phase="work"]  .phase-label { color: var(--green); font-weight: 600; }
+body[data-phase="rest"]  .phase-label { color: var(--red);   font-weight: 600; }
+body[data-phase="alarm"] .phase-label { color: var(--red);   font-weight: 700; }
+
+/* Mute toggle — top right of header */
+.mute-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 120ms, color 200ms, border-color 200ms;
+}
+.mute-toggle:hover { color: var(--ink); }
+.mute-toggle:active { transform: scale(0.95); }
+.mute-icon { width: 20px; height: 20px; display: block; }
+.mute-icon .bell-off { display: none; }
+.mute-toggle.muted { color: var(--red); border-color: var(--red); }
+.mute-toggle.muted .bell-on { display: none; }
+.mute-toggle.muted .bell-off { display: block; }
+
+/* ---------- Dial ---------- */
+.dial-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px 0 4px;
+  /* Touch-action: pan-y means: horizontal drags on the dial don't scroll the page,
+     vertical scrolling still works. */
+  touch-action: pan-y;
+  user-select: none;
+}
+.dial {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  aspect-ratio: 1;
+  display: block;
+}
+
+.hand {
+  transition: var(--hand-transition);
+  transform-box: fill-box;
+  /* transform-origin set in JS via the rotate() function center coords */
+}
+/* When alarm fires, the hand has stopped — no transition needed for snap */
+body[data-phase="alarm"] .hand { transition: none; }
+
+.boundary-knob {
+  cursor: grab;
+  transition: r 120ms, fill 120ms;
+}
+.boundary-knob:active { cursor: grabbing; }
+.boundary-knob.dragging { r: 14; fill: var(--ink); stroke: var(--card); }
+
+/* Readout text inside the dial */
+.readout-label {
+  font-size: 13px;
+  font-weight: 700;
+  fill: var(--muted);
+  letter-spacing: 0.06em;
+}
+.readout-main {
+  font-size: 34px;
+  font-weight: 700;
+  fill: var(--ink);
+}
+.readout-sub {
+  font-size: 12px;
+  fill: var(--hint);
+}
+
+body[data-phase="work"]  .readout-label { fill: var(--green); }
+body[data-phase="rest"]  .readout-label { fill: var(--red); }
+body[data-phase="alarm"] .readout-label { fill: var(--red); }
+body[data-phase="alarm"] .readout-main  { fill: var(--red); }
+
+/* Pulsing rings: hidden by default, animated when alarm is on */
+.alarm-pulse { opacity: 0; }
+.alarm-pulse circle {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 2;
+}
+body[data-phase="alarm"] .alarm-pulse {
+  opacity: 1;
+  animation: pulse 1600ms ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.05; }
+  50%      { opacity: 0.35; }
+}
+
+/* ---------- Hint text ---------- */
+.hint {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 12px 0 4px;
+  min-height: 1.2em;
+}
+
+/* ---------- Phase buttons ---------- */
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.phase-btn {
+  height: 72px;
+  border: none;
+  border-radius: var(--radius-btn);
+  color: #fff;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 100ms ease, opacity 200ms, box-shadow 200ms;
+  font-family: inherit;
+}
+.phase-btn:active { transform: scale(0.98); }
+.phase-btn.work { background: var(--green); }
+.phase-btn.rest { background: var(--red); }
+
+/* The active phase's button becomes a "restart" affordance — recessed look */
+.phase-btn.active {
+  background: transparent;
+  color: #fff;
+  outline: 3px dashed currentColor;
+  outline-offset: -3px;
+}
+.phase-btn.work.active { background: var(--green-dim); color: #fff; }
+.phase-btn.rest.active { background: var(--red-dim);   color: #fff; }
+
+/* Suggested next action during alarm — pulses gently */
+.phase-btn.suggested {
+  animation: btn-pulse 1400ms ease-in-out infinite;
+}
+@keyframes btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.0); transform: scale(1); }
+  50%      { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0.15); transform: scale(1.02); }
+}
+.phase-btn.work.suggested {
+  animation-name: btn-pulse-green;
+}
+@keyframes btn-pulse-green {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.0); transform: scale(1); }
+  50%      { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0.15); transform: scale(1.02); }
+}
+
+/* "Skip" — the off-suggestion button during alarm. Dimmed. */
+.phase-btn.skip { opacity: 0.55; font-weight: 500; font-size: 16px; }
+
+/* ---------- Footer hint ---------- */
+.footer-hint {
+  margin-top: auto;
+  text-align: center;
+  font-size: 11px;
+  color: var(--hint);
+  padding-top: 16px;
+}
+
+/* ---------- Accessibility / focus ---------- */
+.phase-btn:focus-visible,
+.mute-toggle:focus-visible,
+.boundary-knob:focus-visible {
+  outline: 3px solid #1C1917;
+  outline-offset: 2px;
+}
+
+/* Reduce motion if user prefers it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
