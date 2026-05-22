@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" font-family="-apple-system, system-ui, sans-serif">
+  <rect width="400" height="800" fill="#F5F5F4"/>
+
+  <text x="32" y="40" font-size="14" font-weight="600" fill="#44403C">9:41</text>
+  <g fill="#44403C">
+    <circle cx="340" cy="35" r="3"/><circle cx="350" cy="35" r="3"/><circle cx="360" cy="35" r="3"/>
+    <rect x="370" y="30" width="14" height="10" rx="2" fill="none" stroke="#44403C" stroke-width="1.5"/>
+  </g>
+
+  <!-- Mute toggle: unmuted (bell). Tap to mute. -->
+  <g transform="translate(346, 85)">
+    <circle r="18" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="1.5"/>
+    <g transform="translate(0, -2)" stroke="#44403C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M -6 0 a 6 6 0 0 1 12 0 v 4 l 2 3 h -16 l 2 -3 z" fill="#FFFFFF"/>
+      <path d="M -2 8 a 2 2 0 0 0 4 0"/>
+    </g>
+  </g>
+
+  <text x="200" y="90" font-size="22" font-weight="700" fill="#1C1917" text-anchor="middle">Cadence</text>
+  <text x="200" y="115" font-size="13" fill="#78716C" text-anchor="middle" font-style="italic">Adjusting split…</text>
+
+  <!-- Dial track -->
+  <circle cx="200" cy="290" r="130" fill="none" stroke="#E7E5E4" stroke-width="30"/>
+
+  <!-- New green arc 0 → 50 min (300°, large arc) -->
+  <path d="M 200 160 A 130 130 0 1 1 87 225" fill="none" stroke="#16A34A" stroke-width="30"/>
+  <!-- New red arc 50 → 60 min (60°, small arc) -->
+  <path d="M 87 225 A 130 130 0 0 1 200 160" fill="none" stroke="#DC2626" stroke-width="30"/>
+
+  <!-- Ghost of old boundary at 45 -->
+  <circle cx="70" cy="290" r="9" fill="none" stroke="#A8A29E" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.7"/>
+
+  <!-- Movement arc indicator (curve from old to new) -->
+  <path d="M 70 290 A 130 130 0 0 0 87 225" fill="none" stroke="#78716C" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.6"/>
+  <!-- Arrow head pointing to new position -->
+  <polygon points="87,225 80,230 92,232" fill="#78716C" opacity="0.7"/>
+
+  <g stroke="#FAFAF9" stroke-width="2" fill="none">
+    <line x1="200" y1="170" x2="200" y2="180"/>
+    <line x1="310" y1="290" x2="320" y2="290"/>
+    <line x1="200" y1="400" x2="200" y2="410"/>
+    <line x1="80" y1="290" x2="90" y2="290"/>
+  </g>
+
+  <!-- Hand parked at top (idle while adjusting) -->
+  <line x1="200" y1="290" x2="200" y2="195" stroke="#1C1917" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+  <circle cx="200" cy="290" r="6" fill="#1C1917" opacity="0.35"/>
+  <circle cx="200" cy="195" r="4" fill="#1C1917" opacity="0.35"/>
+
+  <!-- Active boundary knob being dragged (larger, with halo) -->
+  <circle cx="87" cy="225" r="22" fill="#1C1917" opacity="0.10"/>
+  <circle cx="87" cy="225" r="14" fill="#FAFAF9" stroke="#1C1917" stroke-width="2.5"/>
+  <circle cx="87" cy="225" r="4" fill="#1C1917"/>
+
+  <!-- Tooltip near knob -->
+  <g transform="translate(20, 155)">
+    <rect width="86" height="36" rx="8" fill="#1C1917"/>
+    <text x="43" y="16" font-size="10" fill="#A8A29E" text-anchor="middle">work / rest</text>
+    <text x="43" y="30" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">50 / 10</text>
+  </g>
+  <!-- Tooltip pointer -->
+  <polygon points="78,200 92,200 87,210" fill="#1C1917"/>
+
+  <!-- Readout inside dial -->
+  <text x="200" y="290" font-size="11" fill="#78716C" text-anchor="middle" font-weight="600">SPLIT</text>
+  <text x="200" y="318" font-size="22" font-weight="700" fill="#1C1917" text-anchor="middle">50 + 10 = 60</text>
+
+  <text x="200" y="470" font-size="13" fill="#78716C" text-anchor="middle">Release to save. Tap the numbers to type instead.</text>
+
+  <!-- Buttons dimmed (not the focus right now) -->
+  <rect x="40" y="510" width="320" height="80" rx="40" fill="#16A34A" opacity="0.5"/>
+  <text x="200" y="558" font-size="20" font-weight="600" fill="#FFFFFF" text-anchor="middle">Start work</text>
+
+  <rect x="40" y="610" width="320" height="80" rx="40" fill="#DC2626" opacity="0.5"/>
+  <text x="200" y="658" font-size="20" font-weight="600" fill="#FFFFFF" text-anchor="middle">Start rest</text>
+
+  <text x="200" y="740" font-size="11" fill="#A8A29E" text-anchor="middle">Total is always 60 min (for now — open design Q in README).</text>
+</svg>
