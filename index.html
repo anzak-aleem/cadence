@@ -62,19 +62,23 @@
                 aria-label="Work / rest split"
                 aria-valuemin="5" aria-valuemax="55" aria-valuenow="45"/>
 
-        <!-- Hand: rotated by JS via transform="rotate(angle 200 200)" -->
+        <!-- Center readout: pushed apart vertically so the hand has a clear
+             horizontal corridor at y=200 to be visible in rest mode. -->
+        <text id="readoutLabel" class="readout-label" x="200" y="178" text-anchor="middle">IDLE</text>
+        <text id="readoutMain" class="readout-main" x="200" y="234" text-anchor="middle">0:00</text>
+        <text id="readoutSub" class="readout-sub" x="200" y="258" text-anchor="middle">/ 45:00</text>
+
+        <!-- Hand: rotated by JS via transform="rotate(angle 200 200)".
+             Floats between radius 35 (inner) and radius 110 (outer).
+             Drawn AFTER the readout so it visibly crosses the text like a real
+             clock hand. Thick stroke + bigger tip = easy to spot at any angle. -->
         <g id="hand" class="hand">
-          <line x1="200" y1="200" x2="200" y2="105" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>
-          <circle cx="200" cy="105" r="4" fill="var(--ink)"/>
+          <line x1="200" y1="165" x2="200" y2="90" stroke="var(--ink)" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="200" cy="90" r="6" fill="var(--ink)"/>
         </g>
 
-        <!-- Pivot dot (drawn over hand line so the joint looks clean) -->
-        <circle cx="200" cy="200" r="6" fill="var(--ink)" id="pivot"/>
-
-        <!-- Center readout (drawn on top so it's legible even when hand crosses) -->
-        <text id="readoutLabel" class="readout-label" x="200" y="186" text-anchor="middle">IDLE</text>
-        <text id="readoutMain" class="readout-main" x="200" y="222" text-anchor="middle">0:00</text>
-        <text id="readoutSub" class="readout-sub" x="200" y="245" text-anchor="middle">/ 45:00</text>
+        <!-- Pivot dot at center — drawn last, sits on top of everything -->
+        <circle cx="200" cy="200" r="4" fill="var(--ink)" id="pivot"/>
       </svg>
     </div>
 

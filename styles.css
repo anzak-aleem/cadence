@@ -116,8 +116,10 @@ body[data-phase="alarm"] .phase-label { color: var(--red);   font-weight: 700; }
 
 .hand {
   transition: var(--hand-transition);
-  transform-box: fill-box;
-  /* transform-origin set in JS via the rotate() function center coords */
+  /* Rotation center is specified directly in the SVG transform attribute,
+     e.g. transform="rotate(270 200 200)". Do NOT set transform-box here —
+     transform-box: fill-box reinterprets the rotation against the hand's
+     bounding box and moves the pivot away from the dial center. */
 }
 /* When alarm fires, the hand has stopped — no transition needed for snap */
 body[data-phase="alarm"] .hand { transition: none; }
