@@ -98,6 +98,26 @@
 
     <footer class="footer-hint" id="footerHint">Drag the dot on the dial to adjust the split.</footer>
 
+    <!-- Day timeline bar -->
+    <div class="timeline" id="timeline" role="img" aria-label="Today's activity timeline">
+      <div class="timeline-labels">
+        <span>00:00</span>
+        <span>12:00</span>
+        <span>24:00</span>
+      </div>
+      <div class="timeline-track" id="timelineTrack">
+        <!-- Segments rendered by JS -->
+        <div class="timeline-now" id="timelineNow" aria-hidden="true"></div>
+      </div>
+      <!-- Tooltip -->
+      <div class="timeline-tooltip" id="timelineTooltip" aria-hidden="true">
+        <span class="timeline-tooltip-dot" id="tooltipDot"></span>
+        <span class="timeline-tooltip-label" id="tooltipLabel"></span>
+        <span class="timeline-tooltip-range" id="tooltipRange"></span>
+        <span class="timeline-tooltip-dur" id="tooltipDur"></span>
+      </div>
+    </div>
+
   </main>
 
   <script type="module" src="app.js"></script>

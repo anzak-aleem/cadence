@@ -265,11 +265,147 @@ body[data-phase="alarm"] .alarm-pulse {
 
 /* ---------- Footer hint ---------- */
 .footer-hint {
-  margin-top: auto;
   text-align: center;
   font-size: 11px;
   color: var(--hint);
   padding-top: 16px;
+}
+
+/* ---------- Day timeline ---------- */
+.timeline {
+  position: relative;
+  margin-top: auto;
+  padding: 0 0 20px;
+  /* Give the tooltip room above the bar */
+  padding-top: 52px;
+}
+
+.timeline-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--hint);
+  margin-bottom: 4px;
+  user-select: none;
+}
+
+.timeline-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--track);
+  overflow: visible;
+}
+
+/* Individual coloured segments */
+.timeline-seg {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  /* First/last segment gets rounded ends — set by JS via class */
+  transition: filter 120ms;
+  cursor: default;
+}
+.timeline-seg.work     { background: var(--green); }
+.timeline-seg.rest     { background: var(--red); }
+.timeline-seg.stopped  { background: var(--ink); opacity: 0.75; }
+
+/* The segment the pointer is over */
+.timeline-seg.hovered {
+  filter: brightness(1.25);
+  z-index: 1;
+}
+
+/* Rounded caps on outermost edges */
+.timeline-track > .timeline-seg:first-of-type { border-radius: 4px 0 0 4px; }
+.timeline-track > .timeline-seg:last-of-type  { border-radius: 0 4px 4px 0; }
+.timeline-track > .timeline-seg:only-of-type  { border-radius: 4px; }
+
+/* Current-moment marker */
+.timeline-now {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  background: var(--ink);
+  border-radius: 1px;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 2;
+  /* Live pulse dot */
+}
+.timeline-now::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 30%, transparent);
+}
+/* Dot colour matches current phase */
+body[data-phase="rest"]  .timeline-now::after { background: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 30%, transparent); }
+body[data-phase="idle"]  .timeline-now::after { background: var(--ink); box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 20%, transparent); opacity: 0.5; }
+body[data-phase="alarm"] .timeline-now::after { background: var(--red); box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 30%, transparent); }
+
+/* ---------- Timeline tooltip ---------- */
+.timeline-tooltip {
+  position: absolute;
+  bottom: calc(100% - 44px);  /* just above the bar */
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  background: var(--ink);
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 120ms, transform 120ms;
+  z-index: 10;
+  /* Horizontal positioning set by JS via `left` */
+}
+.timeline-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Arrow */
+.timeline-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--ink);
+}
+.timeline-tooltip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  align-self: center;
+}
+.timeline-tooltip-dot.work    { background: var(--green); }
+.timeline-tooltip-dot.rest    { background: var(--red); }
+.timeline-tooltip-dot.stopped { background: #aaa; }
+
+.timeline-tooltip-label {
+  font-weight: 600;
+}
+.timeline-tooltip-range {
+  color: #aaa;
+  font-size: 11px;
+}
+.timeline-tooltip-dur {
+  font-weight: 600;
+  margin-left: 2px;
 }
 
 /* ---------- Accessibility / focus ---------- */

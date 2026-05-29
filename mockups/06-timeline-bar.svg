@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 844" width="390" height="844" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif">
+  <defs>
+    <clipPath id="barClip">
+      <rect x="20" y="776" width="350" height="8" rx="4"/>
+    </clipPath>
+    <clipPath id="screenClip">
+      <rect width="390" height="844" rx="40"/>
+    </clipPath>
+  </defs>
+
+  <!-- Phone shell -->
+  <rect width="390" height="844" rx="40" fill="#F5F5F4"/>
+
+  <!-- Status bar -->
+  <text x="32" y="52" font-size="15" font-weight="600" fill="#1C1917">9:41</text>
+  <text x="330" y="52" font-size="13" fill="#1C1917" text-anchor="middle">···  □</text>
+
+  <!-- App header -->
+  <text x="195" y="118" font-size="22" font-weight="700" fill="#1C1917" text-anchor="middle" letter-spacing="-0.2">Cadence</text>
+  <text x="195" y="140" font-size="13" font-weight="600" fill="#127a38" text-anchor="middle">Working</text>
+
+  <!-- Mute button -->
+  <circle cx="362" cy="112" r="19" fill="#FAFAF9" stroke="#D6D3D1" stroke-width="1.5"/>
+  <text x="362" y="117" font-size="14" text-anchor="middle" fill="#78716C">🔔</text>
+
+  <!-- Stop button -->
+  <circle cx="316" cy="112" r="19" fill="#FAFAF9" stroke="#D6D3D1" stroke-width="1.5"/>
+  <rect x="307" y="103" width="10" height="10" rx="2" fill="#78716C"/>
+
+  <!-- Dial ring track -->
+  <circle cx="195" cy="330" r="130" fill="none" stroke="#E7E5E4" stroke-width="30"/>
+
+  <!-- Work arc — most of the ring green -->
+  <path d="M 195 200 A 130 130 0 1 1 94 463" fill="none" stroke="#127a38" stroke-width="30" stroke-linecap="butt"/>
+  <!-- Rest arc — small red slice -->
+  <path d="M 94 463 A 130 130 0 0 1 195 200" fill="none" stroke="#8f2424" stroke-width="30" stroke-linecap="butt"/>
+
+  <!-- Dial center text -->
+  <text x="195" y="318" font-size="12" font-weight="700" fill="#127a38" text-anchor="middle" letter-spacing="1">WORK</text>
+  <text x="195" y="352" font-size="42" font-weight="700" fill="#1C1917" text-anchor="middle" letter-spacing="-1">23:14</text>
+  <text x="195" y="374" font-size="14" fill="#A8A29E" text-anchor="middle">/ 45:00</text>
+
+  <!-- Clock hand -->
+  <line x1="195" y1="330" x2="310" y2="430" stroke="#1C1917" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="310" cy="430" r="5" fill="#1C1917"/>
+  <!-- Hand pivot -->
+  <circle cx="195" cy="330" r="4" fill="none" stroke="#1C1917" stroke-width="1.5"/>
+
+  <!-- Subtitle -->
+  <text x="195" y="498" font-size="14" fill="#78716C" text-anchor="middle">21 min 46 s until your break.</text>
+
+  <!-- Buttons -->
+  <rect x="20" y="524" width="350" height="56" rx="28" fill="#127a38"/>
+  <text x="195" y="558" font-size="17" font-weight="600" fill="white" text-anchor="middle">Restart work</text>
+
+  <rect x="20" y="592" width="350" height="56" rx="28" fill="#8f2424"/>
+  <text x="195" y="626" font-size="17" font-weight="600" fill="white" text-anchor="middle">Start rest</text>
+
+  <text x="195" y="668" font-size="12" fill="#A8A29E" text-anchor="middle">The hand will sweep into red when work ends.</text>
+
+
+  <!-- ═══════════════════════════════════════════════
+       TIMELINE BAR — new feature
+       Represents 00:00 → 23:59 across the full width
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Label row -->
+  <text x="20"  y="762" font-size="10" fill="#A8A29E">00:00</text>
+  <text x="195" y="762" font-size="10" fill="#A8A29E" text-anchor="middle">12:00</text>
+  <text x="370" y="762" font-size="10" fill="#A8A29E" text-anchor="end">24:00</text>
+
+  <!-- Bar background (full day = stopped/idle) -->
+  <rect x="20" y="768" width="350" height="8" rx="4" fill="#D6D3D1"/>
+
+  <!-- Stopped segment: 00:00–09:00 (~37.5% of day = 131px) -->
+  <rect x="20" y="768" width="131" height="8" fill="#1C1917" clip-path="url(#barClip)"/>
+
+  <!-- Work segment: 09:00–10:05 (~4.5% of day ≈ 16px) -->
+  <rect x="151" y="768" width="16" height="8" fill="#127a38" clip-path="url(#barClip)"/>
+
+  <!-- Break segment: 10:05–10:20 (~1% ≈ 4px) -->
+  <rect x="167" y="768" width="4" height="8" fill="#8f2424" clip-path="url(#barClip)"/>
+
+  <!-- Work segment: 10:20–11:45 (~6% ≈ 21px) -->
+  <rect x="171" y="768" width="21" height="8" fill="#127a38" clip-path="url(#barClip)"/>
+
+  <!-- Break segment: 11:45–12:00 (~1% ≈ 4px) -->
+  <rect x="192" y="768" width="4" height="8" fill="#8f2424" clip-path="url(#barClip)"/>
+
+  <!-- Work segment: 12:00–13:30 (~6.25% ≈ 22px) -->
+  <rect x="196" y="768" width="22" height="8" fill="#127a38" clip-path="url(#barClip)"/>
+
+  <!-- Break segment: 13:30–14:00 (~2% ≈ 7px) -->
+  <rect x="218" y="768" width="7" height="8" fill="#8f2424" clip-path="url(#barClip)"/>
+
+  <!-- Work segment: 14:00–current (15:23, ~6% ≈ 22px) -->
+  <rect x="225" y="768" width="22" height="8" fill="#127a38" clip-path="url(#barClip)"/>
+
+  <!-- Current-position indicator: glowing dot at live position -->
+  <!-- Thin white divider line at current moment (15:23 ≈ 64.1% → x=245) -->
+  <rect x="246" y="764" width="2" height="16" rx="1" fill="#1C1917" opacity="0.5"/>
+  <!-- Pulse ring -->
+  <circle cx="247" cy="772" r="6" fill="none" stroke="#127a38" stroke-width="1.5" opacity="0.5"/>
+  <circle cx="247" cy="772" r="3" fill="#127a38"/>
+
+  <!-- Legend row -->
+  <rect x="20"  y="800" width="8" height="8" rx="2" fill="#127a38"/>
+  <text x="32"  y="808" font-size="10" fill="#78716C">Work</text>
+
+  <rect x="72"  y="800" width="8" height="8" rx="2" fill="#8f2424"/>
+  <text x="84"  y="808" font-size="10" fill="#78716C">Break</text>
+
+  <rect x="130" y="800" width="8" height="8" rx="2" fill="#1C1917"/>
+  <text x="142" y="808" font-size="10" fill="#78716C">Stopped</text>
+
+  <rect x="210" y="800" width="8" height="8" rx="2" fill="#D6D3D1"/>
+  <text x="222" y="808" font-size="10" fill="#78716C">Future</text>
+
+</svg>

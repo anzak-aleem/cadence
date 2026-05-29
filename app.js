@@ -10,6 +10,7 @@
 // =====================================================================
 
 const STORAGE_KEY = 'cadence-v1';
+const TIMELINE_KEY = 'cadence-timeline-v1';
 const TOTAL_MINUTES = 60;          // the dial always represents 60 min
 const SNAP_STEP = 5;               // ratio slider snaps to multiples of 5
 const MIN_PHASE = 5;               // each phase is at least 5 min
@@ -331,6 +332,7 @@ function triggerAlarmIfDue() {
 
 function startPhase(phase) {
   ensureAudio();             // unlock audio on the first user gesture
+  recordPhaseChange(phase);
   state.phase = phase;
   state.phaseStartedAt = Date.now();
   lastChimedAt = 0;          // reset chime cadence
@@ -348,6 +350,7 @@ els.muteToggle.addEventListener('click', () => {
 });
 
 els.stopToggle.addEventListener('click', () => {
+  recordPhaseChange('idle');
   state.phase = 'idle';
   state.phaseStartedAt = null;
   lastChimedAt = 0;
@@ -467,15 +470,265 @@ els.knob.addEventListener('keydown', (e) => {
 });
 
 // =====================================================================
+// Timeline — records phase segments for the current calendar day
+// =====================================================================
+// Storage format: { date: 'YYYY-MM-DD', segments: [{phase, start, end|null}] }
+//   phase: 'work' | 'rest' | 'stopped'
+//   start/end: epoch ms
+//   end === null means the segment is ongoing (closed when phase changes)
+// Historical days are kept keyed by date string in a separate store.
+
+const TIMELINE_HISTORY_KEY = 'cadence-timeline-history-v1';
+
+function todayStr() {
+  return new Date().toLocaleDateString('sv');  // 'YYYY-MM-DD', locale-independent
+}
+
+function loadTimeline() {
+  try {
+    const raw = localStorage.getItem(TIMELINE_KEY);
+    if (!raw) return { date: todayStr(), segments: [] };
+    const saved = JSON.parse(raw);
+    // If the saved day isn't today, archive it and start fresh
+    if (saved.date !== todayStr()) {
+      archiveTimeline(saved);
+      return { date: todayStr(), segments: [] };
+    }
+    return saved;
+  } catch (e) {
+    return { date: todayStr(), segments: [] };
+  }
+}
+
+function archiveTimeline(tl) {
+  if (!tl || !tl.date || !tl.segments.length) return;
+  try {
+    const raw = localStorage.getItem(TIMELINE_HISTORY_KEY);
+    const history = raw ? JSON.parse(raw) : {};
+    // Close any open segment before archiving
+    const segs = tl.segments;
+    if (segs.length && segs[segs.length - 1].end === null) {
+      segs[segs.length - 1].end = Date.now();
+    }
+    history[tl.date] = segs;
+    localStorage.setItem(TIMELINE_HISTORY_KEY, JSON.stringify(history));
+  } catch (e) { /* storage full — skip */ }
+}
+
+function saveTimeline() {
+  try { localStorage.setItem(TIMELINE_KEY, JSON.stringify(timeline)); }
+  catch (e) { /* storage full */ }
+}
+
+// timeline is the live mutable object for today
+const timeline = loadTimeline();
+
+// Called whenever the phase changes (including to 'idle' / stopped)
+function recordPhaseChange(newPhase) {
+  const now = Date.now();
+  const segs = timeline.segments;
+
+  // Close any open segment
+  if (segs.length && segs[segs.length - 1].end === null) {
+    segs[segs.length - 1].end = now;
+  }
+
+  // Don't open a "stopped" segment — we infer those from gaps.
+  // Only open for work / rest.
+  if (newPhase === 'work' || newPhase === 'rest') {
+    segs.push({ phase: newPhase, start: now, end: null });
+  }
+
+  saveTimeline();
+}
+
+// ---- Timeline rendering ----
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Returns the fraction of the day (0‒1) for an epoch ms timestamp.
+function dayFrac(ms) {
+  const midnight = new Date();
+  midnight.setHours(0, 0, 0, 0);
+  return clamp((ms - midnight.getTime()) / DAY_MS, 0, 1);
+}
+
+function fmtHHMM(ms) {
+  const d = new Date(ms);
+  return d.getHours().toString().padStart(2, '0') + ':' +
+         d.getMinutes().toString().padStart(2, '0');
+}
+
+function fmtDuration(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 1) return '< 1 min';
+  if (totalMin < 60) return `${totalMin} min`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return m ? `${h} h ${m} min` : `${h} h`;
+}
+
+// Build the list of drawable segments (including implicit "stopped" gaps)
+function buildDrawSegments() {
+  const now = Date.now();
+  const midnight = new Date(); midnight.setHours(0, 0, 0, 0);
+  const midnightMs = midnight.getTime();
+
+  const segs = timeline.segments;
+  const result = [];
+  let cursor = midnightMs;
+
+  for (const s of segs) {
+    const start = Math.max(s.start, midnightMs);
+    const end   = s.end !== null ? s.end : now;
+
+    // Gap before this segment = stopped time
+    if (start > cursor) {
+      result.push({ phase: 'stopped', start: cursor, end: start });
+    }
+    result.push({ phase: s.phase, start, end });
+    cursor = end;
+  }
+
+  // Remaining time up to now = stopped (if we're idle) or already closed above
+  if (cursor < now) {
+    result.push({ phase: 'stopped', start: cursor, end: now });
+  }
+
+  return result;
+}
+
+function renderTimeline() {
+  // Check for day rollover mid-session
+  if (timeline.date !== todayStr()) {
+    archiveTimeline(timeline);
+    timeline.date = todayStr();
+    timeline.segments = [];
+    saveTimeline();
+  }
+
+  const track     = document.getElementById('timelineTrack');
+  const nowEl     = document.getElementById('timelineNow');
+  const tooltip   = document.getElementById('timelineTooltip');
+
+  const drawSegs  = buildDrawSegments();
+  const nowFrac   = dayFrac(Date.now());
+
+  // Position the "now" marker
+  nowEl.style.left = `${nowFrac * 100}%`;
+
+  // Diff-update segments: remove old, add new
+  // Simple approach: clear and redraw (timeline is small, no perf issue)
+  const existing = track.querySelectorAll('.timeline-seg');
+  existing.forEach(el => el.remove());
+
+  for (let i = 0; i < drawSegs.length; i++) {
+    const s = drawSegs[i];
+    const left  = dayFrac(s.start) * 100;
+    const width = (dayFrac(s.end) - dayFrac(s.start)) * 100;
+    if (width < 0.05) continue;  // skip hair-thin segments
+
+    const el = document.createElement('div');
+    el.className = `timeline-seg ${s.phase}`;
+    el.style.left  = `${left}%`;
+    el.style.width = `${width}%`;
+    el._segData = s;  // attach for tooltip
+
+    el.addEventListener('pointerenter', onSegHover);
+    el.addEventListener('pointerleave', onSegLeave);
+    el.addEventListener('pointermove',  onSegMove);
+
+    track.appendChild(el);
+  }
+
+  // Re-apply rounded corners (first/last among siblings)
+  const allSegs = track.querySelectorAll('.timeline-seg');
+  allSegs.forEach((el, i) => {
+    el.classList.remove('first-seg', 'last-seg');
+    // CSS :first-of-type / :last-of-type handles this since they're all divs
+  });
+
+  // Keep tooltip on top of newly added segments
+  track.appendChild(nowEl);
+}
+
+// ---- Tooltip ----
+
+let tooltipSeg = null;
+
+function onSegHover(e) {
+  const seg = e.currentTarget;
+  seg.classList.add('hovered');
+  tooltipSeg = seg;
+  showTooltip(seg, e);
+}
+
+function onSegLeave(e) {
+  const seg = e.currentTarget;
+  seg.classList.remove('hovered');
+  tooltipSeg = null;
+  document.getElementById('timelineTooltip').classList.remove('visible');
+}
+
+function onSegMove(e) {
+  if (tooltipSeg) showTooltip(tooltipSeg, e);
+}
+
+function showTooltip(segEl, e) {
+  const s       = segEl._segData;
+  const now     = Date.now();
+  const tooltip = document.getElementById('timelineTooltip');
+  const track   = document.getElementById('timelineTrack');
+  const isLive  = s.end >= now - 1500;  // within 1.5s = ongoing
+
+  // Label
+  const labelMap = { work: 'Work', rest: 'Break', stopped: 'Stopped' };
+  document.getElementById('tooltipLabel').textContent = labelMap[s.phase] ?? s.phase;
+
+  // Dot colour class
+  const dot = document.getElementById('tooltipDot');
+  dot.className = `timeline-tooltip-dot ${s.phase}`;
+
+  // Time range
+  const endLabel = isLive ? 'now' : fmtHHMM(s.end);
+  document.getElementById('tooltipRange').textContent =
+    `${fmtHHMM(s.start)} – ${endLabel}`;
+
+  // Duration
+  const durMs = (isLive ? now : s.end) - s.start;
+  const durText = isLive
+    ? `${fmtDuration(durMs)} · ongoing`
+    : fmtDuration(durMs);
+  document.getElementById('tooltipDur').textContent = durText;
+
+  // Position: centre over the hovered segment, clamped to viewport
+  tooltip.classList.add('visible');
+  const trackRect = track.getBoundingClientRect();
+  const segRect   = segEl.getBoundingClientRect();
+  const tipW      = tooltip.offsetWidth;
+  const segCentreX = segRect.left + segRect.width / 2 - trackRect.left;
+  const leftPx = clamp(segCentreX - tipW / 2, 0, trackRect.width - tipW);
+  tooltip.style.left = `${leftPx}px`;
+}
+
+// =====================================================================
+// Hook timeline into phase transitions
+// =====================================================================
+
+// Wrap startPhase to also record it
+const _startPhase = startPhase;
+// (we redefine startPhase below after this block — handled inline)
+
+// =====================================================================
 // Tick loop
 // =====================================================================
 
 // Re-render every 250 ms while the page is visible. When hidden, browsers
 // throttle setInterval anyway; on visibilitychange we force one re-render so
 // the dial doesn't appear frozen when the user comes back.
-setInterval(render, TICK_MS);
+setInterval(() => { render(); renderTimeline(); }, TICK_MS);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) render();
+  if (!document.hidden) { render(); renderTimeline(); }
 });
 
 // =====================================================================
@@ -483,3 +736,4 @@ document.addEventListener('visibilitychange', () => {
 // =====================================================================
 
 render();
+renderTimeline();
