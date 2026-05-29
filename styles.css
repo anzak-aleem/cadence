@@ -416,6 +416,218 @@ body[data-phase="alarm"] .timeline-now::after { background: var(--red); box-shad
   outline-offset: 2px;
 }
 
+/* =====================================================================
+   History panel
+   ===================================================================== */
+
+/* Overlay dims the main content when panel is open */
+.history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  pointer-events: none;
+  z-index: 90;
+  transition: background 280ms ease;
+}
+body.history-open .history-overlay {
+  background: rgba(0, 0, 0, 0.22);
+  pointer-events: auto;
+}
+
+/* Panel */
+.history-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 50%;
+  max-width: 240px;
+  min-width: 180px;
+  background: #F7F7F7;
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 320ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 320ms ease;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
+}
+.history-panel.open {
+  transform: translateX(0);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.14);
+}
+
+/* Drag handle nub on the left edge */
+.history-drag-handle {
+  position: absolute;
+  left: -1px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 56px;
+  border-radius: 2px;
+  background: #ccc;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+.history-panel.open .history-drag-handle {
+  opacity: 0.7;
+}
+
+/* Inner scroll container */
+.history-panel-inner {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Panel heading */
+.history-heading {
+  margin: 0;
+  padding: 52px 0 12px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  border-bottom: 1px solid #E0E0E0;
+  flex-shrink: 0;
+}
+
+/* Table scroll wrapper */
+.history-table-wrap {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Table */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: inherit;
+  font-size: 12px;
+}
+
+.history-table thead th {
+  padding: 8px 0 7px;
+  text-align: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #D8D8D8;
+  position: sticky;
+  top: 0;
+  background: #F7F7F7;
+  z-index: 1;
+}
+.history-table thead th.work    { color: var(--green); }
+.history-table thead th.rest    { color: var(--red); }
+.history-table thead th.stopped { color: var(--muted); }
+
+/* Column dividers */
+.history-table td,
+.history-table th {
+  border-right: 0.75px solid #EBEBEB;
+}
+.history-table td:last-child,
+.history-table th:last-child {
+  border-right: none;
+}
+
+/* Body rows */
+.history-table tbody tr {
+  border-bottom: 0.75px solid #F0F0F0;
+}
+.history-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Cells */
+.history-cell {
+  padding: 8px 4px;
+  text-align: center;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* Empty cells */
+.history-table td:empty,
+.history-cell.empty {
+  background: transparent;
+}
+
+/* Range (small, grey) */
+.history-range {
+  display: block;
+  font-size: 7.5px;
+  color: #AAAAAA;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+/* Elapsed time (bold, coloured) */
+.history-elapsed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.history-cell.work    .history-elapsed { color: var(--green); }
+.history-cell.rest    .history-elapsed { color: var(--red); }
+.history-cell.stopped .history-elapsed { color: var(--muted); }
+
+/* Live indicator dot */
+.history-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  flex-shrink: 0;
+  animation: history-blink 1.2s ease-in-out infinite;
+}
+.history-cell.rest .history-dot { background: var(--red); }
+@keyframes history-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+/* Totals row */
+.history-totals {
+  border-top: 1.5px solid #CCCCCC !important;
+}
+.history-totals .history-elapsed {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* Empty state */
+.history-empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--hint);
+}
+
+/* Dismiss hint */
+.history-dismiss-hint {
+  text-align: center;
+  font-size: 9px;
+  color: #CCCCCC;
+  padding: 10px 0 14px;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
 /* Reduce motion if user prefers it */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

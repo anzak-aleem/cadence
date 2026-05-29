@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif">
+  <defs>
+    <linearGradient id="shadowGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full app background -->
+  <rect width="390" height="844" fill="#EDEDED"/>
+
+  <!-- Ghost app content on left half -->
+  <circle cx="97" cy="390" r="100" fill="none" stroke="#D0D0D0" stroke-width="18"/>
+  <circle cx="97" cy="390" r="100" fill="none" stroke="#4CAF50" stroke-width="18" stroke-dasharray="330 100" stroke-dashoffset="0" opacity="0.3"/>
+  <rect x="60" y="372" width="74" height="18" rx="4" fill="#C8C8C8" opacity="0.7"/>
+  <rect x="68" y="396" width="58" height="12" rx="3" fill="#C8C8C8" opacity="0.5"/>
+  <rect x="18" y="632" width="158" height="44" rx="22" fill="#C0C0C0" opacity="0.5"/>
+  <rect x="18" y="686" width="158" height="44" rx="22" fill="#B8B8B8" opacity="0.4"/>
+
+  <!-- Dim overlay on left half -->
+  <rect x="0" y="0" width="195" height="844" fill="#000000" opacity="0.2"/>
+
+  <!-- History panel -->
+  <rect x="195" y="0" width="195" height="844" fill="#F7F7F7"/>
+
+  <!-- Left-edge shadow -->
+  <rect x="195" y="0" width="8" height="844" fill="url(#shadowGrad)"/>
+
+  <!-- Panel header -->
+  <text x="292" y="56" text-anchor="middle" font-size="11" font-weight="400" fill="#888888" letter-spacing="1.2">HISTORY</text>
+  <line x1="195" y1="66" x2="390" y2="66" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Column headers -->
+  <text x="228" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#3A7D3A" letter-spacing="0.5">WORK</text>
+  <text x="293" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#9B2828" letter-spacing="0.5">REST</text>
+  <text x="358" y="84" text-anchor="middle" font-size="9.5" font-weight="700" fill="#666666" letter-spacing="0.5">STOPPED</text>
+  <line x1="195" y1="92" x2="390" y2="92" stroke="#D8D8D8" stroke-width="1"/>
+
+  <!-- Vertical column dividers -->
+  <line x1="261" y1="66" x2="261" y2="790" stroke="#E8E8E8" stroke-width="0.75"/>
+  <line x1="326" y1="66" x2="326" y2="790" stroke="#E8E8E8" stroke-width="0.75"/>
+
+  <!-- Row 1: Work -->
+  <text x="228" y="112" text-anchor="middle" font-size="8" fill="#AAAAAA">09:00 – 09:45</text>
+  <text x="228" y="125" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A7D3A">45:00</text>
+  <line x1="195" y1="136" x2="390" y2="136" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 2: Rest -->
+  <text x="293" y="155" text-anchor="middle" font-size="8" fill="#AAAAAA">09:45 – 10:00</text>
+  <text x="293" y="168" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9B2828">15:00</text>
+  <line x1="195" y1="179" x2="390" y2="179" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 3: Work -->
+  <text x="228" y="198" text-anchor="middle" font-size="8" fill="#AAAAAA">10:00 – 10:43</text>
+  <text x="228" y="211" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A7D3A">43:00</text>
+  <line x1="195" y1="222" x2="390" y2="222" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 4: Stopped -->
+  <text x="358" y="241" text-anchor="middle" font-size="8" fill="#AAAAAA">10:43 – 10:51</text>
+  <text x="358" y="254" text-anchor="middle" font-size="12.5" font-weight="700" fill="#666666">08:12</text>
+  <line x1="195" y1="265" x2="390" y2="265" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 5: Work -->
+  <text x="228" y="284" text-anchor="middle" font-size="8" fill="#AAAAAA">10:51 – 11:36</text>
+  <text x="228" y="297" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A7D3A">45:00</text>
+  <line x1="195" y1="308" x2="390" y2="308" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 6: Rest -->
+  <text x="293" y="327" text-anchor="middle" font-size="8" fill="#AAAAAA">11:36 – 11:51</text>
+  <text x="293" y="340" text-anchor="middle" font-size="12.5" font-weight="700" fill="#9B2828">15:00</text>
+  <line x1="195" y1="351" x2="390" y2="351" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Row 7: Work (live) -->
+  <text x="228" y="370" text-anchor="middle" font-size="8" fill="#AAAAAA">11:51 – now</text>
+  <text x="228" y="383" text-anchor="middle" font-size="12.5" font-weight="700" fill="#3A7D3A">23:14</text>
+  <circle cx="246" cy="379" r="3.5" fill="#3A7D3A" opacity="0.8"/>
+  <line x1="195" y1="394" x2="390" y2="394" stroke="#F0F0F0" stroke-width="0.75"/>
+
+  <!-- Totals row -->
+  <line x1="195" y1="790" x2="390" y2="790" stroke="#CCCCCC" stroke-width="1.5"/>
+  <text x="228" y="810" text-anchor="middle" font-size="8" font-weight="600" fill="#3A7D3A">TOTAL</text>
+  <text x="228" y="826" text-anchor="middle" font-size="13" font-weight="800" fill="#3A7D3A">2:36:14</text>
+  <text x="293" y="810" text-anchor="middle" font-size="8" font-weight="600" fill="#9B2828">TOTAL</text>
+  <text x="293" y="826" text-anchor="middle" font-size="13" font-weight="800" fill="#9B2828">30:00</text>
+  <text x="358" y="810" text-anchor="middle" font-size="8" font-weight="600" fill="#666666">TOTAL</text>
+  <text x="358" y="826" text-anchor="middle" font-size="13" font-weight="800" fill="#666666">08:12</text>
+
+  <!-- Swipe-back hint -->
+  <rect x="197" y="415" width="4" height="56" rx="2" fill="#CCCCCC" opacity="0.65"/>
+
+  <!-- Dismiss gesture annotation -->
+  <text x="305" y="756" text-anchor="middle" font-size="8.5" fill="#BBBBBB" letter-spacing="0.3">swipe right to dismiss</text>
+  <line x1="260" y1="762" x2="350" y2="762" stroke="#DDDDDD" stroke-width="1" stroke-dasharray="3 3"/>
+  <polygon points="350,759 357,762 350,765" fill="#DDDDDD"/>
+
+  <!-- Status bar time -->
+  <text x="360" y="24" text-anchor="middle" font-size="12" fill="#1A1A1A">9:41</text>
+</svg>

@@ -720,15 +720,151 @@ const _startPhase = startPhase;
 // (we redefine startPhase below after this block — handled inline)
 
 // =====================================================================
+// History panel
+// =====================================================================
+
+let historyPanelOpen = false;
+
+function openHistoryPanel() {
+  historyPanelOpen = true;
+  const panel   = document.getElementById('historyPanel');
+  const overlay = document.getElementById('historyOverlay');
+  panel.classList.add('open');
+  panel.setAttribute('aria-hidden', 'false');
+  overlay.classList.add('open');
+  document.body.classList.add('history-open');
+  renderHistoryPanel();
+}
+
+function closeHistoryPanel() {
+  historyPanelOpen = false;
+  const panel   = document.getElementById('historyPanel');
+  const overlay = document.getElementById('historyOverlay');
+  panel.classList.remove('open');
+  panel.setAttribute('aria-hidden', 'true');
+  overlay.classList.remove('open');
+  document.body.classList.remove('history-open');
+}
+
+// Close when clicking the overlay
+document.getElementById('historyOverlay').addEventListener('click', closeHistoryPanel);
+
+// Build rows from today's recorded activity (excluding leading stopped gap)
+function buildHistoryRows() {
+  const segs = buildDrawSegments();
+  const firstActive = segs.findIndex(s => s.phase !== 'stopped');
+  if (firstActive === -1) return [];
+  return segs.slice(firstActive);
+}
+
+function renderHistoryPanel() {
+  if (!historyPanelOpen) return;
+  const tbody = document.getElementById('historyTbody');
+  const rows  = buildHistoryRows();
+  const now   = Date.now();
+
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="history-empty">No activity recorded yet today.</td></tr>';
+    return;
+  }
+
+  const totals = { work: 0, rest: 0, stopped: 0 };
+
+  let html = '';
+  for (const s of rows) {
+    const isLive    = s.end === null || s.end >= now - 1500;
+    const endMs     = isLive ? now : s.end;
+    const elapsedMs = endMs - s.start;
+    totals[s.phase] += elapsedMs;
+
+    const startStr   = fmtHHMM(s.start);
+    const endStr     = isLive ? 'now' : fmtHHMM(s.end);
+    const elapsedStr = fmtMS(elapsedMs / 1000);
+    const dot        = isLive ? '<span class="history-dot"></span>' : '';
+
+    const cell = (phase) => {
+      if (s.phase !== phase) return '<td></td>';
+      return `<td class="history-cell ${phase}${isLive ? ' live' : ''}">` +
+             `<span class="history-range">${startStr}\u2013${endStr}</span>` +
+             `<span class="history-elapsed">${elapsedStr}${dot}</span>` +
+             `</td>`;
+    };
+
+    html += `<tr>${cell('work')}${cell('rest')}${cell('stopped')}</tr>`;
+  }
+
+  // Totals row
+  const fmtTotal = (ms) => ms > 0 ? fmtMS(ms / 1000) : '\u2014';
+  html += `<tr class="history-totals">` +
+          `<td class="history-cell work"><span class="history-elapsed">${fmtTotal(totals.work)}</span></td>` +
+          `<td class="history-cell rest"><span class="history-elapsed">${fmtTotal(totals.rest)}</span></td>` +
+          `<td class="history-cell stopped"><span class="history-elapsed">${fmtTotal(totals.stopped)}</span></td>` +
+          `</tr>`;
+
+  tbody.innerHTML = html;
+}
+
+// =====================================================================
+// Swipe & keyboard gestures for the history panel
+// =====================================================================
+
+// Touch swipe: right-to-left on app → open; left-to-right on panel → close
+let touchStartX = null;
+let touchStartY = null;
+const SWIPE_THRESHOLD = 60;  // px
+const SWIPE_RATIO     = 2;   // horizontal must exceed vertical by this factor
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
+  if (touchStartX === null) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+
+  if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) {
+    touchStartX = null;
+    touchStartY = null;
+    return;
+  }
+
+  if (dx < 0 && !historyPanelOpen) {
+    // Right-to-left anywhere on the page → open
+    openHistoryPanel();
+  } else if (dx > 0 && historyPanelOpen) {
+    // Left-to-right anywhere → close
+    closeHistoryPanel();
+  }
+
+  touchStartX = null;
+  touchStartY = null;
+}, { passive: true });
+
+// Keyboard: ArrowLeft opens; ArrowRight / Escape closes
+window.addEventListener('keydown', (e) => {
+  // Don't steal from the boundary knob's own arrow handler
+  if (e.target === els.knob) return;
+  if (e.key === 'ArrowLeft' && !historyPanelOpen) {
+    openHistoryPanel();
+    e.preventDefault();
+  } else if ((e.key === 'ArrowRight' || e.key === 'Escape') && historyPanelOpen) {
+    closeHistoryPanel();
+    e.preventDefault();
+  }
+});
+
+// =====================================================================
 // Tick loop
 // =====================================================================
 
 // Re-render every 250 ms while the page is visible. When hidden, browsers
 // throttle setInterval anyway; on visibilitychange we force one re-render so
 // the dial doesn't appear frozen when the user comes back.
-setInterval(() => { render(); renderTimeline(); }, TICK_MS);
+setInterval(() => { render(); renderTimeline(); renderHistoryPanel(); }, TICK_MS);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) { render(); renderTimeline(); }
+  if (!document.hidden) { render(); renderTimeline(); renderHistoryPanel(); }
 });
 
 // =====================================================================

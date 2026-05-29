@@ -120,6 +120,29 @@
 
   </main>
 
+  <!-- History panel — slides in from the right -->
+  <aside class="history-panel" id="historyPanel" aria-label="Session history" aria-hidden="true">
+    <div class="history-panel-inner">
+      <p class="history-heading">History</p>
+      <div class="history-table-wrap">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th class="work">Work</th>
+              <th class="rest">Rest</th>
+              <th class="stopped">Stopped</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="history-drag-handle" id="historyDragHandle" aria-hidden="true"></div>
+  </aside>
+
+  <!-- Overlay that dims the main app when the panel is open -->
+  <div class="history-overlay" id="historyOverlay" aria-hidden="true"></div>
+
   <script type="module" src="app.js"></script>
 </body>
 </html>
