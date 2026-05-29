@@ -132,6 +132,14 @@ function fmtMS(sec) {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
+function fmtHMS(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  const s = sec % 60;
+  return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+}
+
 // =====================================================================
 // DOM references
 // =====================================================================
@@ -558,16 +566,12 @@ function dayFrac(ms) {
 function fmtHHMM(ms) {
   const d = new Date(ms);
   return d.getHours().toString().padStart(2, '0') + ':' +
-         d.getMinutes().toString().padStart(2, '0');
+         d.getMinutes().toString().padStart(2, '0') + ':' +
+         d.getSeconds().toString().padStart(2, '0');
 }
 
 function fmtDuration(ms) {
-  const totalMin = Math.floor(ms / 60000);
-  if (totalMin < 1) return '< 1 min';
-  if (totalMin < 60) return `${totalMin} min`;
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  return m ? `${h} h ${m} min` : `${h} h`;
+  return fmtHMS(ms / 1000);
 }
 
 // Build the list of drawable segments (including implicit "stopped" gaps)
@@ -781,7 +785,7 @@ function renderHistoryPanel() {
 
     const startStr   = fmtHHMM(s.start);
     const endStr     = isLive ? 'now' : fmtHHMM(s.end);
-    const elapsedStr = fmtMS(elapsedMs / 1000);
+    const elapsedStr = fmtHMS(elapsedMs / 1000);
     const dot        = isLive ? '<span class="history-dot"></span>' : '';
 
     const cell = (phase) => {
@@ -796,7 +800,7 @@ function renderHistoryPanel() {
   }
 
   // Totals row
-  const fmtTotal = (ms) => ms > 0 ? fmtMS(ms / 1000) : '\u2014';
+  const fmtTotal = (ms) => ms > 0 ? fmtHMS(ms / 1000) : '\u2014';
   html += `<tr class="history-totals">` +
           `<td class="history-cell work"><span class="history-elapsed">${fmtTotal(totals.work)}</span></td>` +
           `<td class="history-cell rest"><span class="history-elapsed">${fmtTotal(totals.rest)}</span></td>` +
