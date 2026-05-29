@@ -263,6 +263,19 @@ body[data-phase="alarm"] .alarm-pulse {
 /* "Skip" — the off-suggestion button during alarm. Dimmed. */
 .phase-btn.skip { opacity: 0.55; font-weight: 500; font-size: 16px; }
 
+/* Stop button */
+.phase-btn.stop {
+  background: var(--ink);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 100ms ease, opacity 200ms, box-shadow 200ms;
+}
+body:not([data-phase="idle"]) .phase-btn.stop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ---------- Footer hint ---------- */
 .footer-hint {
   text-align: center;

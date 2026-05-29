@@ -349,14 +349,16 @@ els.muteToggle.addEventListener('click', () => {
   render();
 });
 
-els.stopToggle.addEventListener('click', () => {
+function doStop() {
   recordPhaseChange('idle');
   state.phase = 'idle';
   state.phaseStartedAt = null;
   lastChimedAt = 0;
   save();
   render();
-});
+}
+els.stopToggle.addEventListener('click', doStop);
+document.getElementById('stopBtn').addEventListener('click', doStop);
 
 // ----- Drag the hand (scrub elapsed time, 5-min snaps) -----
 let draggingHand = false;
