@@ -304,8 +304,8 @@ body:not([data-phase="idle"]) .phase-btn.stop {
 
 .timeline-track {
   position: relative;
-  height: 8px;
-  border-radius: 4px;
+  height: 16px;
+  border-radius: 8px;
   background: var(--track);
   overflow: visible;
 }
@@ -315,6 +315,8 @@ body:not([data-phase="idle"]) .phase-btn.stop {
   position: absolute;
   top: 0;
   height: 100%;
+  /* 2px gap at transitions via box-shadow inset trick */
+  box-shadow: 2px 0 0 0 var(--bg), -2px 0 0 0 var(--bg);
   /* First/last segment gets rounded ends — set by JS via class */
   transition: filter 120ms;
   cursor: default;
@@ -330,16 +332,16 @@ body:not([data-phase="idle"]) .phase-btn.stop {
 }
 
 /* Rounded caps on outermost edges */
-.timeline-track > .timeline-seg:first-of-type { border-radius: 4px 0 0 4px; }
-.timeline-track > .timeline-seg:last-of-type  { border-radius: 0 4px 4px 0; }
-.timeline-track > .timeline-seg:only-of-type  { border-radius: 4px; }
+.timeline-track > .timeline-seg:first-of-type { border-radius: 8px 0 0 8px; }
+.timeline-track > .timeline-seg:last-of-type  { border-radius: 0 8px 8px 0; }
+.timeline-track > .timeline-seg:only-of-type  { border-radius: 8px; }
 
 /* Current-moment marker */
 .timeline-now {
   position: absolute;
   top: -4px;
   width: 2px;
-  height: 16px;
+  height: 24px;
   background: var(--ink);
   border-radius: 1px;
   opacity: 0.35;

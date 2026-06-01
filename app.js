@@ -563,6 +563,39 @@ function dayFrac(ms) {
   return clamp((ms - midnight.getTime()) / DAY_MS, 0, 1);
 }
 
+// Compute the bar's visible time range: defaults 08:00–20:00, expands to fit any segment.
+function computeBarRange() {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const t = today.getTime();
+  let startMs = t + 8  * 3600_000;
+  let endMs   = t + 20 * 3600_000;
+
+  const now = Date.now();
+  for (const s of timeline.segments) {
+    const segStart = s.start;
+    const segEnd   = s.end !== null ? s.end : now;
+    if (segStart < startMs) startMs = segStart;
+    if (segEnd   > endMs)   endMs   = segEnd;
+  }
+  // Also expand to include "now" if it's outside the default range
+  if (now > endMs)   endMs   = now;
+  if (now < startMs) startMs = now;
+
+  return { startMs, endMs };
+}
+
+// Returns the fraction within the bar range (0–1) for an epoch ms timestamp.
+function barFrac(ms, startMs, endMs) {
+  return clamp((ms - startMs) / (endMs - startMs), 0, 1);
+}
+
+function msToHHMM(ms) {
+  const total = Math.round(ms / 60000);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return h.toString().padStart(2, '0') + ':' + m.toString().padStart(2, '0');
+}
+
 function fmtHHMM(ms) {
   const d = new Date(ms);
   return d.getHours().toString().padStart(2, '0') + ':' +
@@ -618,7 +651,16 @@ function renderTimeline() {
   const tooltip   = document.getElementById('timelineTooltip');
 
   const drawSegs  = buildDrawSegments();
-  const nowFrac   = dayFrac(Date.now());
+  const { startMs, endMs } = computeBarRange();
+  const nowFrac   = barFrac(Date.now(), startMs, endMs);
+
+  // Update labels to reflect bar range
+  const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0);
+  const labels = document.querySelectorAll('.timeline-labels span');
+  if (labels.length >= 2) {
+    labels[0].textContent = msToHHMM(startMs - todayMidnight.getTime());
+    labels[labels.length - 1].textContent = msToHHMM(endMs - todayMidnight.getTime());
+  }
 
   // Position the "now" marker
   nowEl.style.left = `${nowFrac * 100}%`;
@@ -630,14 +672,15 @@ function renderTimeline() {
 
   for (let i = 0; i < drawSegs.length; i++) {
     const s = drawSegs[i];
-    const left  = dayFrac(s.start) * 100;
-    const width = (dayFrac(s.end) - dayFrac(s.start)) * 100;
-    if (width < 0.05) continue;  // skip hair-thin segments
+    const leftFrac  = barFrac(s.start, startMs, endMs);
+    const rightFrac = barFrac(s.end,   startMs, endMs);
+    const widthFrac = rightFrac - leftFrac;
+    if (widthFrac < 0.0005) continue;  // skip hair-thin segments
 
     const el = document.createElement('div');
     el.className = `timeline-seg ${s.phase}`;
-    el.style.left  = `${left}%`;
-    el.style.width = `${width}%`;
+    el.style.left  = `${leftFrac * 100}%`;
+    el.style.width = `${widthFrac * 100}%`;
     el._segData = s;  // attach for tooltip
 
     el.addEventListener('pointerenter', onSegHover);
