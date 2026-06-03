@@ -122,6 +122,76 @@ body:not([data-phase="idle"]) .stop-toggle {
 .mute-toggle.muted .bell-on { display: none; }
 .mute-toggle.muted .bell-off { display: block; }
 
+/* ---- App title wrap + keyboard shortcuts tooltip ---- */
+.app-title-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.shortcuts-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  background: var(--ink);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 160ms, transform 160ms;
+  z-index: 50;
+}
+.app-title-wrap:hover .shortcuts-tooltip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+/* Arrow pointing up toward the title */
+.shortcuts-tooltip::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: var(--ink);
+}
+
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 12px;
+  align-items: center;
+}
+.sk-keys {
+  text-align: right;
+  color: #ccc;
+}
+.shortcuts-tooltip kbd {
+  display: inline-block;
+  background: rgba(255,255,255,0.14);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 10px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+/* ---- Action feedback ---- */
+.action-feedback {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin: 0;
+  min-height: 1.5em;
+  transition: opacity 500ms ease;
+}
+.action-feedback.hidden {
+  opacity: 0;
+}
+
 /* ---------- Dial ---------- */
 .dial-wrap {
   display: flex;

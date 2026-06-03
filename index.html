@@ -11,7 +11,20 @@
   <main class="app">
 
     <header class="app-header">
-      <h1>Cadence</h1>
+      <div class="app-title-wrap">
+        <h1>Cadence</h1>
+        <div class="shortcuts-tooltip" aria-hidden="true">
+          <div class="shortcuts-grid">
+            <span class="sk-keys"><kbd>Space</kbd></span><span>Start work</span>
+            <span class="sk-keys"><kbd>⇧Space</kbd> / <kbd>⌘Space</kbd></span><span>Restart work</span>
+            <span class="sk-keys"><kbd>R</kbd></span><span>Start rest</span>
+            <span class="sk-keys"><kbd>⇧R</kbd> / <kbd>⌘R</kbd></span><span>Restart rest</span>
+            <span class="sk-keys"><kbd>↑</kbd></span><span>+1 min</span>
+            <span class="sk-keys"><kbd>↓</kbd></span><span>−1 min</span>
+            <span class="sk-keys"><kbd>Esc</kbd></span><span>Stop</span>
+          </div>
+        </div>
+      </div>
       <p class="phase-label" id="phaseLabel">45 min work · 15 min rest</p>
       <button class="stop-toggle" id="stopToggle" aria-label="Stop timer" type="button">
         <svg class="stop-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -96,6 +109,8 @@
         <circle cx="200" cy="200" r="4" fill="var(--ink)" id="pivot"/>
       </svg>
     </div>
+
+    <p class="action-feedback hidden" id="actionFeedback"></p>
 
     <p class="hint" id="hint">Tap a button to begin.</p>
 

@@ -167,7 +167,21 @@ const els = {
   stopToggle:    $('#stopToggle'),
   muteToggle:    $('#muteToggle'),
   footerHint:    $('#footerHint'),
+  actionFeedback: $('#actionFeedback'),
 };
+
+// =====================================================================
+// Action feedback — brief status message below the clock
+// =====================================================================
+
+let feedbackTimer = null;
+
+function showFeedback(msg) {
+  els.actionFeedback.textContent = msg;
+  els.actionFeedback.classList.remove('hidden');
+  clearTimeout(feedbackTimer);
+  feedbackTimer = setTimeout(() => els.actionFeedback.classList.add('hidden'), 3000);
+}
 
 // =====================================================================
 // Render — single function, called every tick and after any state change
@@ -970,16 +984,79 @@ document.addEventListener('touchend', (e) => {
   touchStartY = null;
 }, { passive: true });
 
-// Keyboard: ArrowLeft opens; ArrowRight / Escape closes
+// Global keyboard shortcuts
 window.addEventListener('keydown', (e) => {
-  // Don't steal from the boundary knob's own arrow handler
-  if (e.target === els.knob) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+  // Escape: close history panel if open, otherwise stop the timer
+  if (e.key === 'Escape') {
+    if (historyPanelOpen) {
+      closeHistoryPanel();
+    } else if (state.phase !== 'idle') {
+      doStop();
+      showFeedback('Timer stopped');
+    }
+    e.preventDefault();
+    return;
+  }
+
+  // Let the knobs handle their own arrow keys
+  if (e.target === els.knob || e.target === els.restEndKnob) return;
+
+  // Arrow left/right: history panel navigation
   if (e.key === 'ArrowLeft' && !historyPanelOpen) {
     openHistoryPanel();
     e.preventDefault();
-  } else if ((e.key === 'ArrowRight' || e.key === 'Escape') && historyPanelOpen) {
+    return;
+  }
+  if (e.key === 'ArrowRight' && historyPanelOpen) {
     closeHistoryPanel();
     e.preventDefault();
+    return;
+  }
+
+  // Space: start work (idle only) or restart work (shift/cmd)
+  if (e.key === ' ') {
+    e.preventDefault();
+    if (e.shiftKey || e.metaKey) {
+      startPhase('work');
+      showFeedback('Work restarted');
+    } else if (state.phase === 'idle') {
+      startPhase('work');
+      showFeedback('Work started');
+    }
+    return;
+  }
+
+  // R / Shift+R / Cmd+R: start or restart rest
+  if (e.key === 'r' || e.key === 'R') {
+    if (e.metaKey) e.preventDefault();  // prevent browser refresh on Cmd+R
+    const restart = e.shiftKey || e.metaKey;
+    const wasResting = state.phase === 'rest';
+    startPhase('rest');
+    showFeedback(restart || wasResting ? 'Rest restarted' : 'Rest started');
+    return;
+  }
+
+  // Arrow up/down: adjust elapsed time ±1 minute while a phase is running
+  if (e.key === 'ArrowUp' && state.phase !== 'idle') {
+    e.preventDefault();
+    state.phaseStartedAt -= 60_000;
+    lastChimedAt = 0;
+    save();
+    render();
+    showFeedback('Time increased by 1 minute');
+    return;
+  }
+  if (e.key === 'ArrowDown' && state.phase !== 'idle') {
+    e.preventDefault();
+    const now = Date.now();
+    state.phaseStartedAt = Math.min(state.phaseStartedAt + 60_000, now);
+    lastChimedAt = 0;
+    save();
+    render();
+    showFeedback('Time decreased by 1 minute');
+    return;
   }
 });
 
