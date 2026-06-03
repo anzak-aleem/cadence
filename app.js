@@ -21,6 +21,7 @@ const ALARM_REPEAT_MS = 5000;
 const DEFAULT_STATE = {
   workMinutes: 45,
   restMinutes: 15,
+  restExtMinutes: 0,      // one-time extension added on top of restMinutes
   phase: 'idle',          // 'idle' | 'work' | 'rest'
   phaseStartedAt: null,   // epoch ms, or null when idle
   muted: false,
@@ -42,6 +43,7 @@ function loadState() {
     // Keep work/rest consistent with the fixed 60-min total.
     merged.workMinutes = clamp(merged.workMinutes, MIN_PHASE, MAX_PHASE);
     merged.restMinutes = TOTAL_MINUTES - merged.workMinutes;
+    merged.restExtMinutes = clamp(merged.restExtMinutes ?? 0, 0, merged.workMinutes);
     return merged;
   } catch (e) {
     return { ...DEFAULT_STATE };
@@ -98,8 +100,9 @@ function derive() {
     };
   }
 
+  const { restExtMinutes } = state;
   const elapsedSec = (now - phaseStartedAt) / 1000;
-  const limitSec = (phase === 'work' ? workMinutes : restMinutes) * 60;
+  const limitSec = (phase === 'work' ? workMinutes : restMinutes + restExtMinutes) * 60;
   const isOvertime = elapsedSec >= limitSec;
   const overtimeSec = isOvertime ? elapsedSec - limitSec : 0;
 
@@ -110,9 +113,10 @@ function derive() {
       ? workMinutes                            // boundary between green and red
       : (elapsedSec / 60);                     // 0 .. workMinutes
   } else {
+    // rest can extend past 60 min on the dial (wraps past 12 o'clock)
     handMinute = isOvertime
-      ? TOTAL_MINUTES                          // top of dial (also = 0)
-      : workMinutes + (elapsedSec / 60);       // workMinutes .. 60
+      ? TOTAL_MINUTES + restExtMinutes         // final position past 12
+      : workMinutes + (elapsedSec / 60);       // workMinutes .. TOTAL_MINUTES+restExtMinutes
   }
 
   return {
@@ -150,8 +154,10 @@ const els = {
   phaseLabel:    $('#phaseLabel'),
   workArc:       $('#workArc'),
   restArc:       $('#restArc'),
+  restExtArc:    $('#restExtArc'),
   hand:          $('#hand'),
   knob:          $('#boundaryKnob'),
+  restEndKnob:   $('#restEndKnob'),
   readoutLabel:  $('#readoutLabel'),
   readoutMain:   $('#readoutMain'),
   readoutSub:    $('#readoutSub'),
@@ -171,14 +177,25 @@ function render() {
   const d = derive();
 
   // ---- Arcs ----
-  els.workArc.setAttribute('d', arcPath(0, state.workMinutes, RING_R));
+  // Green arc starts where the red extension ends, shortening when rest is extended.
+  els.workArc.setAttribute('d', arcPath(state.restExtMinutes, state.workMinutes, RING_R));
   els.restArc.setAttribute('d', arcPath(state.workMinutes, TOTAL_MINUTES, RING_R));
+  els.restExtArc.setAttribute('d', state.restExtMinutes > 0
+    ? arcPath(0, state.restExtMinutes, RING_R)
+    : '');
 
   // ---- Boundary knob ----
   const knobPos = polar(state.workMinutes, RING_R);
   els.knob.setAttribute('cx', knobPos.x);
   els.knob.setAttribute('cy', knobPos.y);
   els.knob.setAttribute('aria-valuenow', state.workMinutes);
+
+  // ---- Rest-end knob ----
+  const restEndPos = polar(state.restExtMinutes, RING_R);
+  els.restEndKnob.setAttribute('cx', restEndPos.x);
+  els.restEndKnob.setAttribute('cy', restEndPos.y);
+  els.restEndKnob.setAttribute('aria-valuenow', state.restExtMinutes);
+  els.restEndKnob.setAttribute('aria-valuemax', state.workMinutes);
 
   // ---- Hand rotation ----
   // The hand's local geometry already points straight up; we just rotate.
@@ -191,8 +208,8 @@ function render() {
   // ---- Readout & hint text ----
   let label, main, sub, hint;
   let footer = (d.uiPhase === 'idle')
-    ? 'Drag the dot on the dial to adjust the split.'
-    : 'Drag the hand to adjust elapsed time · Drag the dot to change the split.';
+    ? 'White dot = work/rest split · Red dot = rest end · Drag to adjust.'
+    : 'Drag hand to scrub · White dot = split · Red dot = rest end';
 
   if (d.uiPhase === 'idle') {
     label = 'IDLE';
@@ -208,8 +225,8 @@ function render() {
   } else if (d.uiPhase === 'rest') {
     label = 'REST';
     main  = fmtMS(d.elapsedSec);
-    sub   = `/ ${state.restMinutes}:00`;
-    const remain = state.restMinutes * 60 - d.elapsedSec;
+    sub   = `/ ${state.restMinutes + state.restExtMinutes}:00`;
+    const remain = (state.restMinutes + state.restExtMinutes) * 60 - d.elapsedSec;
     hint  = `${fmtMS(remain)} of rest left.`;
   } else if (d.uiPhase === 'alarm') {
     // state.phase tells us which phase just ended
@@ -221,7 +238,7 @@ function render() {
     } else {
       label = 'OVERTIME';
       main  = `−${fmtMS(d.overtimeSec)}`;
-      sub   = `past ${state.restMinutes}:00`;
+      sub   = `past ${state.restMinutes + state.restExtMinutes}:00`;
       hint  = `Tap green to begin your ${state.workMinutes} min of work.`;
     }
     footer = 'Chime repeats every 5 s — tap the bell to mute.';
@@ -341,6 +358,7 @@ function triggerAlarmIfDue() {
 function startPhase(phase) {
   ensureAudio();             // unlock audio on the first user gesture
   recordPhaseChange(phase);
+  if (phase === 'work') state.restExtMinutes = 0;  // discard one-time rest extension
   state.phase = phase;
   state.phaseStartedAt = Date.now();
   lastChimedAt = 0;          // reset chime cadence
@@ -361,6 +379,7 @@ function doStop() {
   recordPhaseChange('idle');
   state.phase = 'idle';
   state.phaseStartedAt = null;
+  state.restExtMinutes = 0;  // discard one-time rest extension
   lastChimedAt = 0;
   save();
   render();
@@ -380,9 +399,14 @@ function setHandMinute(rawMinute) {
     const snapped = clamp(Math.round(rawMinute / SNAP_STEP) * SNAP_STEP, 0, workMinutes);
     newElapsedMin = snapped;
   } else {
-    // rest phase: hand spans workMinutes → TOTAL_MINUTES
-    const snapped = clamp(Math.round(rawMinute / SNAP_STEP) * SNAP_STEP, workMinutes, TOTAL_MINUTES);
-    newElapsedMin = snapped - workMinutes;
+    // rest phase: hand spans workMinutes → workMinutes + restMinutes + restExtMinutes
+    const totalRest = state.restMinutes + state.restExtMinutes;
+    const maxHandMin = state.workMinutes + totalRest;
+    // Values near 0 could be in the "past midnight" extension zone — shift them up.
+    let adjusted = rawMinute;
+    if (rawMinute <= state.restExtMinutes) adjusted = rawMinute + TOTAL_MINUTES;
+    const snapped = clamp(Math.round(adjusted / SNAP_STEP) * SNAP_STEP, state.workMinutes, maxHandMin);
+    newElapsedMin = snapped - state.workMinutes;
   }
 
   state.phaseStartedAt = Date.now() - newElapsedMin * 60 * 1000;
@@ -476,6 +500,61 @@ els.knob.addEventListener('keydown', (e) => {
   if (delta !== 0) {
     e.preventDefault();
     setWorkMinutes(state.workMinutes + delta);
+  }
+});
+
+// ----- Drag the rest-end knob (extend rest beyond TOTAL_MINUTES) -----
+let draggingRestEnd = false;
+
+function setRestExtMinutes(rawMinute) {
+  const maxExt = state.workMinutes;
+  let m = rawMinute;
+  // Values in the rest zone (workMinutes..TOTAL_MINUTES) are out of range.
+  // Snap to the nearest valid edge (0 or maxExt).
+  if (m > maxExt) {
+    const distToMax  = m - maxExt;
+    const distToZero = TOTAL_MINUTES - m;
+    m = distToZero < distToMax ? 0 : maxExt;
+  }
+  const snapped = clamp(Math.round(m / SNAP_STEP) * SNAP_STEP, 0, maxExt);
+  if (snapped === state.restExtMinutes) return;
+  state.restExtMinutes = snapped;
+  save();
+  render();
+}
+
+function onRestEndPointerDown(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  draggingRestEnd = true;
+  els.restEndKnob.classList.add('dragging');
+  els.restEndKnob.setPointerCapture?.(e.pointerId);
+  setRestExtMinutes(minutesFromPoint(svgPointFromEvent(e)));
+}
+function onRestEndPointerMove(e) {
+  if (!draggingRestEnd) return;
+  setRestExtMinutes(minutesFromPoint(svgPointFromEvent(e)));
+}
+function onRestEndPointerUp(e) {
+  if (!draggingRestEnd) return;
+  draggingRestEnd = false;
+  els.restEndKnob.classList.remove('dragging');
+  els.restEndKnob.releasePointerCapture?.(e.pointerId);
+}
+
+els.restEndKnob.addEventListener('pointerdown', onRestEndPointerDown);
+window.addEventListener('pointermove', onRestEndPointerMove);
+window.addEventListener('pointerup',   onRestEndPointerUp);
+window.addEventListener('pointercancel', onRestEndPointerUp);
+
+// Keyboard control on the rest-end knob
+els.restEndKnob.addEventListener('keydown', (e) => {
+  let delta = 0;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp')   delta = +SNAP_STEP;
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowDown') delta = -SNAP_STEP;
+  if (delta !== 0) {
+    e.preventDefault();
+    setRestExtMinutes(clamp(state.restExtMinutes + delta, 0, state.workMinutes));
   }
 });
 

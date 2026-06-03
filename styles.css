@@ -164,6 +164,13 @@ body[data-phase="rest"] .hand { cursor: grab; }
 .boundary-knob:active { cursor: grabbing; }
 .boundary-knob.dragging { r: 14; fill: var(--ink); stroke: var(--card); }
 
+.rest-end-knob {
+  cursor: grab;
+  transition: r 120ms, fill 120ms;
+}
+.rest-end-knob:active { cursor: grabbing; }
+.rest-end-knob.dragging { r: 14; fill: var(--red); stroke: var(--card); }
+
 /* Readout text inside the dial */
 .readout-label {
   font-size: 13px;

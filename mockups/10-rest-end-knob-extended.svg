@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" font-family="-apple-system, system-ui, sans-serif">
+  <rect width="400" height="800" fill="#F5F5F4"/>
+
+  <!-- Status bar -->
+  <text x="32" y="40" font-size="14" font-weight="600" fill="#44403C">9:41</text>
+  <g fill="#44403C">
+    <circle cx="340" cy="35" r="3"/><circle cx="350" cy="35" r="3"/><circle cx="360" cy="35" r="3"/>
+    <rect x="370" y="30" width="14" height="10" rx="2" fill="none" stroke="#44403C" stroke-width="1.5"/>
+  </g>
+
+  <!-- Mute toggle -->
+  <g transform="translate(346, 85)">
+    <circle r="18" fill="#FFFFFF" stroke="#D6D3D1" stroke-width="1.5"/>
+    <g transform="translate(0, -2)" stroke="#44403C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <path d="M -6 0 a 6 6 0 0 1 12 0 v 4 l 2 3 h -16 l 2 -3 z" fill="#FFFFFF"/>
+      <path d="M -2 8 a 2 2 0 0 0 4 0"/>
+    </g>
+  </g>
+
+  <!-- Header -->
+  <text x="185" y="90" font-size="22" font-weight="700" fill="#1C1917" text-anchor="middle">Cadence</text>
+  <text x="185" y="115" font-size="13" fill="#78716C" text-anchor="middle" font-style="italic">Extending rest…</text>
+
+  <!-- Dial track -->
+  <circle cx="200" cy="290" r="130" fill="none" stroke="#E7E5E4" stroke-width="30"/>
+
+  <!--
+    Arc math (center 200,290 · radius 130):
+      0 min  (12 o'clock):  (200, 160)
+     10 min  (~1 o'clock):  (313, 225)   angle=-30° → x=200+130·cos(-30°)=313, y=290+130·sin(-30°)=225
+     45 min  (9 o'clock):   ( 70, 290)
+
+    Green arc  10 → 45 min (210°, large): M 313 225 A 130 130 0 1 1 70 290
+    Red main   45 → 60 min ( 90°, small): M  70 290 A 130 130 0 0 1 200 160
+    Red ext     0 → 10 min ( 60°, small): M 200 160 A 130 130 0 0 1 313 225
+  -->
+
+  <!-- Green arc: 10 → 45 min (shortened because red wraps into start) -->
+  <path d="M 313 225 A 130 130 0 1 1 70 290" fill="none" stroke="#16A34A" stroke-width="30"/>
+
+  <!-- Red arc: 45 → 60 min (unchanged) -->
+  <path d="M 70 290 A 130 130 0 0 1 200 160" fill="none" stroke="#DC2626" stroke-width="30"/>
+
+  <!-- Red extended arc: 0 → 10 min (wraps past 12 clockwise) -->
+  <path d="M 200 160 A 130 130 0 0 1 313 225" fill="none" stroke="#DC2626" stroke-width="30"/>
+
+  <!-- Quarter tick marks on top -->
+  <g stroke="#FAFAF9" stroke-width="2" fill="none">
+    <line x1="200" y1="170" x2="200" y2="180"/>
+    <line x1="310" y1="290" x2="320" y2="290"/>
+    <line x1="200" y1="400" x2="200" y2="410"/>
+    <line x1="80" y1="290" x2="90" y2="290"/>
+  </g>
+
+  <!-- Hand at top (idle / adjusting) -->
+  <line x1="200" y1="290" x2="200" y2="195" stroke="#1C1917" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+  <circle cx="200" cy="290" r="6" fill="#1C1917" opacity="0.35"/>
+  <circle cx="200" cy="195" r="4" fill="#1C1917" opacity="0.35"/>
+
+  <!-- Work/rest boundary knob at 45 min → (70, 290), dimmed while rest-end is being dragged -->
+  <circle cx="70" cy="290" r="11" fill="#FAFAF9" stroke="#1C1917" stroke-width="2" opacity="0.5"/>
+
+  <!-- Ghost of old rest-end knob at 12 o'clock, showing where it came from -->
+  <circle cx="200" cy="160" r="9" fill="none" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="3 2" opacity="0.6"/>
+
+  <!-- Dashed movement arc from 12 o'clock to 10 min (guide) -->
+  <path d="M 200 160 A 130 130 0 0 1 313 225" fill="none" stroke="#DC2626" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.5"/>
+
+  <!-- Arrowhead at 10 min position pointing clockwise -->
+  <polygon points="313,225 305,213 318,212" fill="#DC2626" opacity="0.7"/>
+
+  <!-- REST-END knob being dragged: halo + body + center dot  at (313, 225) -->
+  <circle cx="313" cy="225" r="22" fill="#DC2626" opacity="0.12"/>
+  <circle cx="313" cy="225" r="14" fill="#FAFAF9" stroke="#DC2626" stroke-width="2.5"/>
+  <circle cx="313" cy="225" r="4"  fill="#DC2626"/>
+
+  <!-- Tooltip balloon near dragged knob -->
+  <!-- Pointer line from balloon left edge to knob -->
+  <line x1="306" y1="183" x2="311" y2="210" stroke="#DC2626" stroke-width="1.5"/>
+  <g transform="translate(228, 155)">
+    <rect width="104" height="38" rx="8" fill="#DC2626"/>
+    <text x="52" y="15" font-size="10" fill="#FECACA" text-anchor="middle">rest end</text>
+    <text x="52" y="30" font-size="14" font-weight="700" fill="#FFFFFF" text-anchor="middle">25 min total</text>
+  </g>
+
+  <!-- Readout inside dial -->
+  <text x="200" y="265" font-size="10" fill="#78716C" text-anchor="middle" font-weight="600" letter-spacing="1">EXTEND REST</text>
+  <text x="200" y="295" font-size="24" font-weight="700" fill="#1C1917" text-anchor="middle">15 + 10</text>
+  <text x="200" y="318" font-size="13" fill="#DC2626" text-anchor="middle" font-weight="600">= 25 min rest</text>
+
+  <!-- Small annotation: total session length -->
+  <text x="200" y="340" font-size="11" fill="#A8A29E" text-anchor="middle">45 + 25 = 70 min total</text>
+
+  <!-- Hint text -->
+  <text x="200" y="460" font-size="13" fill="#78716C" text-anchor="middle">Max: drag red dot to the white dot (45 min extra)</text>
+
+  <!-- Buttons -->
+  <rect x="40" y="490" width="320" height="68" rx="34" fill="#16A34A" opacity="0.45"/>
+  <text x="200" y="531" font-size="19" font-weight="600" fill="#FFFFFF" text-anchor="middle">Start work</text>
+
+  <rect x="40" y="574" width="320" height="68" rx="34" fill="#DC2626" opacity="0.45"/>
+  <text x="200" y="615" font-size="19" font-weight="600" fill="#FFFFFF" text-anchor="middle">Start rest</text>
+
+  <!-- Footer note -->
+  <text x="200" y="680" font-size="11" fill="#A8A29E" text-anchor="middle">Red dot snaps back to 12 o'clock after rest ends.</text>
+  <text x="200" y="696" font-size="11" fill="#A8A29E" text-anchor="middle">Extension is one-time; split (45/15) is unchanged.</text>
+</svg>

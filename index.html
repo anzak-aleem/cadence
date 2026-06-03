@@ -51,6 +51,8 @@
         <path id="workArc" d="" fill="none" stroke="var(--green)" stroke-width="30"/>
         <!-- Rest arc (red). 'd' attribute filled in by JS. -->
         <path id="restArc" d="" fill="none" stroke="var(--red)" stroke-width="30"/>
+        <!-- Rest extension arc (red, wraps past 12 o'clock). 'd' filled by JS. -->
+        <path id="restExtArc" d="" fill="none" stroke="var(--red)" stroke-width="30"/>
 
         <!-- Quarter tick marks on top of arcs (subtle separators) -->
         <g class="ticks" stroke="var(--bg)" stroke-width="2" fill="none">
@@ -66,6 +68,12 @@
                 tabindex="0" role="slider"
                 aria-label="Work / rest split"
                 aria-valuemin="5" aria-valuemax="55" aria-valuenow="45"/>
+        <!-- Rest-end knob (draggable, red ring). cx/cy filled in by JS. -->
+        <circle id="restEndKnob" class="rest-end-knob" cx="200" cy="70" r="11"
+                fill="var(--card)" stroke="var(--red)" stroke-width="2.5"
+                tabindex="0" role="slider"
+                aria-label="Rest end"
+                aria-valuemin="0" aria-valuemax="45" aria-valuenow="0"/>
 
         <!-- Center readout: pushed apart vertically so the hand has a clear
              horizontal corridor at y=200 to be visible in rest mode. -->
